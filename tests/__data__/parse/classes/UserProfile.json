@@ -1,0 +1,53 @@
+{
+  "results": [
+    {
+      "objectId": "EJOtqR92S",
+      "weight": 173,
+      "height": 72,
+      "ringSerial": "",
+      "email": "user@domain.com",
+      "weeklyGoal": 600,
+      "batteryLevel": 0,
+      "user": {
+        "__type": "Pointer",
+        "className": "_User",
+        "objectId": "NyCm9CchB"
+      },
+      "createdAt": "2017-10-02T21:51:41.726Z",
+      "updatedAt": "2018-11-05T19:12:30.150Z",
+      "firstName": "Gio",
+      "lastName": "Palacino",
+      "birthDate": {
+        "__type": "Date",
+        "iso": "1980-02-02T00:00:00.000Z"
+      },
+      "gender": "Male",
+      "syncDate": {
+        "__type": "Date",
+        "iso": "2018-11-05T19:12:29.823Z"
+      },
+      "onboardingCompleted": true,
+      "onboardingCompletedDate": {
+        "__type": "Date",
+        "iso": "2017-10-02T21:56:18.639Z"
+      },
+      "isLastHRRingFeatureEnabled": false,
+      "isFindMyPhoneFeatureEnabled": false,
+      "weightUnit": "lb",
+      "heightUnit": "ft",
+      "distanceUnit": "mi",
+      "dailySleepGoal": 480,
+      "viewedNewFeatureVersion": "2.0.5_842",
+      "dailyStepsGoal": 8000,
+      "ACL": {
+        "role:admin": {
+          "read": true
+        },
+        "NyCm9CchB": {
+          "read": true,
+          "write": true
+        }
+      }
+    }
+  ]
+}

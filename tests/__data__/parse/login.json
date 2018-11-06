@@ -1,0 +1,13 @@
+{
+  "objectId": "NyCm9CchB",
+  "username": "user@domain.com",
+  "email": "user@domain.com",
+  "emailVerified": true,
+  "createdAt": "2017-09-28T21:37:53.376Z",
+  "updatedAt": "2017-09-28T21:38:35.009Z",
+  "ACL": {
+    "*": { "read": true },
+    "NyCm9CchB": { "read": true, "write": true }
+  },
+  "sessionToken": "r:42a688e47be14636ab0fa3dc13a6fb31"
+}
