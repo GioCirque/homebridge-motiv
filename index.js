@@ -36,7 +36,11 @@ class MotivPlatform {
   }
 
   setup() {
-    this.addAccessory('heart');
+    try {
+      this.addAccessory('heart');
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   createSensorAccessory(account, type) {
