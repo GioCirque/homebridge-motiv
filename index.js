@@ -47,7 +47,7 @@ class MotivPlatform {
     const uuid = UUIDGen.generate(`Motiv_${account.userId}_${type}`);
     this.log.info(`Creating ${type} sensor for ${account.userId}`);
 
-    accessory = new PlatformAccessory(type, uuid);
+    const accessory = new PlatformAccessory(type, uuid);
     accessory.addService(Service.OccupancySensor, type);
 
     accessory
