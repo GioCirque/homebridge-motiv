@@ -35,7 +35,9 @@ class MotivPlatform {
     });
   }
 
-  setup() {}
+  setup() {
+    this.addAccessory('heart');
+  }
 
   createSensorAccessory(account, type) {
     const uuid = UUIDGen.generate(`Motiv_${account.userId}_${type}`);
