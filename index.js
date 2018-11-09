@@ -15,13 +15,13 @@ class MotivPlatform {
       if (this.config) {
         const now = new Date(Date.now());
         if (!this.config.account) {
-          console.error(chalk`{red.bold MotivPlatform configuration is incomplete.}
+          this.log.error(chalk`{red.bold MotivPlatform configuration is incomplete.}
           Please run: "motiv-cli login <email>" to get the missing account configuration.`);
           return;
         } else {
           const sessionExpiry = new Date(Date.parse(this.config.account.sessionExpiry));
           if (sessionExpiry < now) {
-            console.error(chalk`{red.bold MotivPlatform account session is expired.}
+            this.log.error(chalk`{red.bold MotivPlatform account session is expired.}
             Please run: "motiv-cli login <email>" to get fresh credentials.`);
             return;
           }
@@ -39,7 +39,7 @@ class MotivPlatform {
     let accessory = this.accessories[uuid];
     const uuid = UUIDGen.generate(`Motiv_${account.userId}_${type}`);
     if (!accessory) {
-      this.log(chalk`{blue Adding ${type} sensor for ${account.userId}}`);
+      this.log.info(chalk`{blue Adding ${type} sensor for ${account.userId}}`);
 
       accessory = new Accessory(type, uuid);
       accessory.addService(Service.OccupancySensor, type);
