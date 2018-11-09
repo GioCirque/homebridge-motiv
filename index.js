@@ -1,9 +1,8 @@
 const { MotivApi } = require('lib/motiv');
-const { EventEmitter } = require('events');
 
 let Accessory, Characteristic, Service, UUIDGen;
 
-class MotivPlatform extends EventEmitter {
+class MotivPlatform {
   constructor(log, config, api) {
     this.log = log;
     this.api = api;
