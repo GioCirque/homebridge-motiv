@@ -1,7 +1,9 @@
 const { MotivApi } = require('./lib/motiv');
 
 let Accessory, Characteristic, Service, UUIDGen;
-const { PackageName = name, PluginName = displayName } = require('./package.json');
+const pkg = require('./package.json');
+const PackageName = pkg.name;
+const PluginName = pkg.displayName;
 
 class MotivPlatform {
   constructor(log, config, api) {
