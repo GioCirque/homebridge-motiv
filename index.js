@@ -1,7 +1,7 @@
 const { MotivApi } = require('./lib/motiv');
-const chalk = require('chalk');
 
 let Accessory, Characteristic, Service, UUIDGen;
+const { PackageName = name, PluginName = displayName } = require('./package.json');
 
 class MotivPlatform {
   constructor(log, config, api) {
@@ -9,6 +9,7 @@ class MotivPlatform {
     this.api = api;
     this.config = config || {};
     this.motivApi = new MotivApi();
+    this.accessories = [];
 
     this.api.on('didFinishLaunching', () => {
       if (this.config) {
@@ -32,28 +33,50 @@ class MotivPlatform {
     });
   }
 
-  setup() {
-    this.addSensor(this.config.account, 'heart');
-  }
+  setup() {}
 
-  addSensor(account, type) {
-    let accessory = this.accessories[uuid];
+  createSensorAccessory(account, type) {
     const uuid = UUIDGen.generate(`Motiv_${account.userId}_${type}`);
-    if (!accessory) {
-      this.log.info(chalk`{blue Adding ${type} sensor for ${account.userId}}`);
+    this.log.info(`Creating ${type} sensor for ${account.userId}`);
 
-      accessory = new Accessory(type, uuid);
-      accessory.addService(Service.OccupancySensor, type);
-
-      this.accessories[uuid] = accessory;
-      this.api.registerPlatformAccessories(pluginName, platformName, [accessory]);
-    }
+    accessory = new Accessory(type, uuid);
+    accessory.addService(Service.OccupancySensor, type);
 
     accessory
       .getService(Service.AccessoryInformation)
       .setCharacteristic(Characteristic.Manufacturer, 'Motiv Homebridge Sensors')
       .setCharacteristic(Characteristic.Model, `Motiv ${type} sensor`)
       .setCharacteristic(Characteristic.SerialNumber, `${type.toLowerCase()}-${account.userId}`);
+
+    return accessory;
+  }
+
+  // Called from device classes
+  registerPlatformAccessory(accessory) {
+    this.log.debug('Registering %s', accessory.displayName);
+    this.api.registerPlatformAccessories(PackageName, PluginName, [accessory]);
+  }
+
+  // Function invoked when homebridge tries to restore cached accessory
+  configureAccessory(accessory) {
+    this.log.info('Adding: %s', accessory.displayName);
+    this.accessories.push(accessory);
+  }
+
+  addAccessory(accessoryName) {
+    this.log.info('Adding: %s', accessoryName);
+    const accessory = this.createSensorAccessory(this.config.account, accessoryName);
+    this.accessories.push(accessory);
+  }
+
+  removeAccessory(accessory) {
+    if (!accessory) {
+      return;
+    }
+
+    this.log.info('Removing: %s', accessory.displayName);
+    this.accessories.delete(accessory);
+    this.api.unregisterPlatformAccessories(PackageName, PluginName, [accessory]);
   }
 }
 
@@ -63,5 +86,5 @@ module.exports = function(homebridge) {
   Service = homebridge.hap.Service;
   UUIDGen = homebridge.hap.uuid;
 
-  homebridge.registerPlatform('homebridge-motiv', 'MotivPlatform', MotivPlatform, true);
+  homebridge.registerPlatform(PackageName, PluginName, MotivPlatform, true);
 };
