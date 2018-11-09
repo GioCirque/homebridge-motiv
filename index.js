@@ -1,6 +1,6 @@
 const { MotivApi } = require('./lib/motiv');
 
-let Accessory, Characteristic, Service, UUIDGen;
+let PlatformAccessory, Characteristic, Service, UUIDGen;
 const pkg = require('./package.json');
 const PackageName = pkg.name;
 const PluginName = pkg.displayName;
@@ -43,7 +43,7 @@ class MotivPlatform {
     const uuid = UUIDGen.generate(`Motiv_${account.userId}_${type}`);
     this.log.info(`Creating ${type} sensor for ${account.userId}`);
 
-    accessory = new Accessory(type, uuid);
+    accessory = new PlatformAccessory(type, uuid);
     accessory.addService(Service.OccupancySensor, type);
 
     accessory
@@ -51,6 +51,8 @@ class MotivPlatform {
       .setCharacteristic(Characteristic.Manufacturer, 'Motiv Homebridge Sensors')
       .setCharacteristic(Characteristic.Model, `Motiv ${type} sensor`)
       .setCharacteristic(Characteristic.SerialNumber, `${type.toLowerCase()}-${account.userId}`);
+
+    this.registerPlatformAccessory(accessory);
 
     return accessory;
   }
@@ -85,7 +87,7 @@ class MotivPlatform {
 }
 
 module.exports = function(homebridge) {
-  Accessory = homebridge.platformAccessory;
+  PlatformAccessory = homebridge.platformAccessory;
   Characteristic = homebridge.hap.Characteristic;
   Service = homebridge.hap.Service;
   UUIDGen = homebridge.hap.uuid;
