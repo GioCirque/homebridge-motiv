@@ -11,18 +11,19 @@ class MotivPlatform {
     this.motivApi = new MotivApi();
 
     this.api.on('didFinishLaunching', () => {
-      this.log.debug('didFinishLaunching');
       if (this.config) {
         const now = new Date(Date.now());
         if (!this.config.account) {
-          this.log.error(chalk`{red.bold MotivPlatform configuration is incomplete.}
-          Please run: "motiv-cli login <email>" to get the missing account configuration.`);
+          this.log.error(
+            'Incomplete configuration. Run: "motiv-cli login <email>" for account configuration.'
+          );
           return;
         } else {
           const sessionExpiry = new Date(Date.parse(this.config.account.sessionExpiry));
           if (sessionExpiry < now) {
-            this.log.error(chalk`{red.bold MotivPlatform account session is expired.}
-            Please run: "motiv-cli login <email>" to get fresh credentials.`);
+            this.log.error(
+              'Account session expired. Run "motiv-cli login <email>" to renew session'
+            );
             return;
           }
           this.setup();
