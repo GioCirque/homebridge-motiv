@@ -5,9 +5,9 @@ const { configKeys } = require('./constants');
 const { MotivApi } = require('../lib/motiv');
 
 function maybeAuthenticate(email, options, config) {
-  let spinner = ora('Authenticating...');
-  let authData = config.get(configKeys.auth);
   const now = new Date(Date.now());
+  let spinner = ora('Authenticating...');
+  let authData = config.get(configKeys.auth) || {};
   const authExpiry = new Date(Date.parse(authData.sessionExpiry));
   if (authData && authExpiry >= now && options.force === false) {
     spinner.succeed(chalk`{green.bold Authenticated until ${authExpiry.toLocaleString()}}`);
