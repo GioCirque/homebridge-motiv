@@ -1,8 +1,8 @@
 const ora = require('ora');
 const chalk = require('chalk');
 const inquirer = require('inquirer');
-const configKeys = require('./constants').configKeys;
-const MotivApi = require('../lib/motiv').MotivApi;
+const { configKeys } = require('./constants');
+const { MotivApi } = require('../lib/motiv');
 
 function maybeAuthenticate(email, options, config) {
   let spinner = ora('Authenticating...');
@@ -10,7 +10,18 @@ function maybeAuthenticate(email, options, config) {
   const now = new Date(Date.now());
   const authExpiry = new Date(Date.parse(authData.sessionExpiry));
   if (authData && authExpiry >= now && options.force === false) {
-    spinner.succeed(chalk`{green Authenticated until {bold ${authExpiry.toLocaleString()}}}`);
+    spinner.succeed(chalk`{green.bold Authenticated until ${authExpiry.toLocaleString()}}`);
+    console.log(
+      chalk`{blue.bold Homebridge platform config should be:\n${JSON.stringify(
+        {
+          platform: 'MotivPlatform',
+          name: 'MotivPlatform',
+          account: authData,
+        },
+        undefined,
+        4
+      )}}`
+    );
   } else {
     inquirer
       .prompt([
@@ -30,6 +41,17 @@ function maybeAuthenticate(email, options, config) {
             config.set(configKeys.auth, authData);
             spinner.succeed(
               chalk`{green Authenticated until {bold ${authExpiry.toLocaleString()}}}`
+            );
+            console.log(
+              chalk`{blue.bold Homebridge platform config should be:\n${JSON.stringify(
+                {
+                  platform: 'MotivPlatform',
+                  name: 'MotivPlatform',
+                  account: authData,
+                },
+                undefined,
+                4
+              )}}`
             );
           })
           .catch((err) => {

@@ -2,7 +2,7 @@
 const chalk = require('chalk').default;
 const program = require('commander');
 const configstore = require('configstore');
-const maybeAuthenticate = require('./authenticate').maybeAuthenticate;
+const { maybeAuthenticate } = require('./authenticate');
 
 // Set up config store
 const pkg = require('../package.json');
