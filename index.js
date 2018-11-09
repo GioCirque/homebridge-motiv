@@ -1,4 +1,5 @@
 const { MotivApi } = require('./lib/motiv');
+const chalk = require('chalk');
 
 let Accessory, Characteristic, Service, UUIDGen;
 
@@ -38,7 +39,7 @@ class MotivPlatform {
     let accessory = this.accessories[uuid];
     const uuid = UUIDGen.generate(`Motiv_${account.userId}_${type}`);
     if (!accessory) {
-      this.log(`Adding ${type} sensor for ${account.userId}`);
+      this.log(chalk`{blue Adding ${type} sensor for ${account.userId}}`);
 
       accessory = new Accessory(type, uuid);
       accessory.addService(Service.OccupancySensor, type);
