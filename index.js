@@ -1,4 +1,4 @@
-const { MotivApi } = require('lib/motiv');
+const { MotivApi } = require('./lib/motiv');
 
 let Accessory, Characteristic, Service, UUIDGen;
 
