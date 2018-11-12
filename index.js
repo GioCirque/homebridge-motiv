@@ -64,6 +64,7 @@ class MotivPlatform {
 
   setupSensor(accessory, type) {
     accessory.displayName = `${type[0].toUpperCase()}${type.slice(1).toLowerCase()}`;
+    this.log.info('Setting up %s', accessory.displayName);
 
     let service = accessory.getService(this.serviceType);
     if (service) {
@@ -90,7 +91,7 @@ class MotivPlatform {
 
   // Called from device classes
   registerPlatformAccessory(accessory) {
-    this.log.debug('Registering %s', accessory.displayName);
+    this.log.info('Registering %s', accessory.displayName);
     this.api.registerPlatformAccessories(PackageName, PluginName, [accessory]);
   }
 
