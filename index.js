@@ -10,36 +10,37 @@ class MotivPlatform {
     this.log = log;
     this.api = api;
     this.config = config || {};
-    this.motivApi = new MotivApi();
+    this.motivApi = new MotivApi(this.config.account);
     this.accessories = [];
+    this.serviceType = Service.OccupancySensor;
 
     this.api.on('didFinishLaunching', () => {
-      if (this.config) {
-        const now = new Date(Date.now());
-        if (!this.config.account) {
-          this.log.error(
-            'Incomplete configuration. Run: "motiv-cli login <email>" for account configuration.'
-          );
+      const now = new Date(Date.now());
+      if (!this.config.account) {
+        this.log.error(
+          'Incomplete configuration. Run: "motiv-cli login <email>" for account configuration.'
+        );
+        return;
+      } else {
+        const sessionExpiry = new Date(Date.parse(this.config.account.sessionExpiry));
+        if (sessionExpiry < now) {
+          this.log.error('Account session expired. Run "motiv-cli login <email>" to renew session');
           return;
-        } else {
-          const sessionExpiry = new Date(Date.parse(this.config.account.sessionExpiry));
-          if (sessionExpiry < now) {
-            this.log.error(
-              'Account session expired. Run "motiv-cli login <email>" to renew session'
-            );
-            return;
-          }
-          this.setup();
         }
+        this.setup();
       }
     });
   }
 
   setup() {
-    try {
-      this.addAccessory('heart');
-    } catch (e) {
-      console.error(e);
+    if (this.motivApi.needsAuth === false) {
+      try {
+        this.addAccessory('awake');
+      } catch (e) {
+        console.error(e);
+      }
+    } else {
+      console.error('The Motiv API needs authentication. Run "motiv-cli login <email>"');
     }
   }
 
@@ -48,7 +49,7 @@ class MotivPlatform {
     this.log.info(`Creating ${type} sensor for ${account.userId}`);
 
     const accessory = new PlatformAccessory(type, uuid);
-    accessory.addService(Service.OccupancySensor, type);
+    this.setupSensorService(accessory, type);
 
     accessory
       .getService(Service.AccessoryInformation)
@@ -59,6 +60,24 @@ class MotivPlatform {
     this.registerPlatformAccessory(accessory);
 
     return accessory;
+  }
+
+  setupSensorService(accessory) {
+    let service = accessory.getService(this.serviceType);
+    if (service) {
+      service.setCharacteristic(Characteristic.Name, type);
+    } else {
+      service = accessory.addService(this.serviceType, type);
+    }
+
+    service.getCharacteristic(Characteristic.OccupancyDetected).on('get', (callback) => {
+      const now = new Date(Date.now());
+      this.log.debug('[%s] On get', accessory.displayName);
+      this.motivApi
+        .getLastAwakening()
+        .then((wokeTime) => callback(null, wokeTime >= now))
+        .catch((err) => callback(err));
+    });
   }
 
   // Called from device classes
