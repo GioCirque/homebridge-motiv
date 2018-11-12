@@ -95,7 +95,7 @@ class MotivPlatform {
 
   // Function invoked when homebridge tries to restore cached accessory
   configureAccessory(accessory) {
-    this.log.info('Adding: %s', accessory.displayName);
+    this.log.info('Configuring: %s', accessory.displayName);
     this.accessories.push(accessory);
   }
 
