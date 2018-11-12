@@ -49,7 +49,7 @@ class MotivPlatform {
     this.log.info(`Creating ${type} sensor for ${account.userId}`);
 
     const accessory = new PlatformAccessory(type, uuid);
-    this.setupSensorService(accessory, type);
+    this.setupSensor(accessory, type);
 
     accessory
       .getService(Service.AccessoryInformation)
@@ -62,12 +62,14 @@ class MotivPlatform {
     return accessory;
   }
 
-  setupSensorService(accessory, type) {
+  setupSensor(accessory, type) {
+    accessory.displayName = `${type[0].toUpperCase()}${type.slice(1).toLowerCase()}`;
+
     let service = accessory.getService(this.serviceType);
     if (service) {
-      service.setCharacteristic(Characteristic.Name, type);
+      service.setCharacteristic(Characteristic.Name, accessory.displayName);
     } else {
-      service = accessory.addService(this.serviceType, type);
+      service = accessory.addService(this.serviceType, accessory.displayName);
     }
 
     service.getCharacteristic(Characteristic.OccupancyDetected).on('get', (callback) => {
@@ -75,8 +77,14 @@ class MotivPlatform {
       this.log.debug('[%s] On get', accessory.displayName);
       this.motivApi
         .getLastAwakening()
-        .then((wokeTime) => callback(null, wokeTime >= now))
-        .catch((err) => callback(err));
+        .then((wokeTime) => {
+          console.info(`Updated ${type} to be ${wokeTime >= now}`);
+          callback(null, wokeTime >= now);
+        })
+        .catch((err) => {
+          console.error(err, `Failed to update ${type} status`);
+          callback(err);
+        });
     });
   }
 
