@@ -62,7 +62,7 @@ class MotivPlatform {
     return accessory;
   }
 
-  setupSensorService(accessory) {
+  setupSensorService(accessory, type) {
     let service = accessory.getService(this.serviceType);
     if (service) {
       service.setCharacteristic(Characteristic.Name, type);
