@@ -57,8 +57,6 @@ class MotivPlatform {
       .setCharacteristic(Characteristic.Model, `Motiv ${type} sensor`)
       .setCharacteristic(Characteristic.SerialNumber, `${type.toLowerCase()}-${account.userId}`);
 
-    this.registerPlatformAccessory(accessory);
-
     return accessory;
   }
 
@@ -104,6 +102,7 @@ class MotivPlatform {
   addAccessory(accessoryName) {
     this.log.info('Adding: %s', accessoryName);
     const accessory = this.createSensorAccessory(this.config.account, accessoryName);
+    this.registerPlatformAccessory(accessory);
     this.accessories.push(accessory);
   }
 
