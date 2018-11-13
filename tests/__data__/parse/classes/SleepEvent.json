@@ -1,0 +1,30 @@
+{
+  "results": [
+    {
+      "objectId": "4kH8Axn2B",
+      "utcEnd": 1541424202,
+      "isDeleted": false,
+      "restingHeartRate": 0,
+      "originalUtcStart": 1541389579,
+      "originalUtcEnd": 1541424202,
+      "sleepMinutes": 537,
+      "utcStart": 1541389579,
+      "user": {
+        "__type": "Pointer",
+        "className": "_User",
+        "objectId": "NyCm9CchB"
+      },
+      "createdAt": "2018-11-05T04:35:13.563Z",
+      "updatedAt": "2018-11-05T19:14:15.171Z",
+      "ACL": {
+        "role:admin": {
+          "read": true
+        },
+        "NyCm9CchB": {
+          "read": true,
+          "write": true
+        }
+      }
+    }
+  ]
+}

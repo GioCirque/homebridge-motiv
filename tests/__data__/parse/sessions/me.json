@@ -1,0 +1,21 @@
+{
+  "objectId": "Vkfl0ShnH",
+  "sessionToken": "r:42a688e47be14636ab0fa3dc13a6fb31",
+  "user": {
+    "__type": "Pointer",
+    "className": "_User",
+    "objectId": "NyCm9CchB"
+  },
+  "createdWith": {
+    "action": "login",
+    "authProvider": "password"
+  },
+  "restricted": false,
+  "expiresAt": {
+    "__type": "Date",
+    "iso": "2019-11-05T19:15:03.932Z"
+  },
+  "installationId": "11ec7737-0d33-43e7-80da-8a7716cc8dbb",
+  "createdAt": "2018-11-05T19:15:03.932Z",
+  "updatedAt": "2018-11-05T19:15:03.932Z"
+}
