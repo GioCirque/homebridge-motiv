@@ -1,48 +1,50 @@
 const { MotivApi } = require('./lib/motiv');
 
-let PlatformAccessory, Characteristic, Service, UUIDGen;
+let PlatformAccessory, Characteristic, Service, UUIDGen, platform;
 const pkg = require('./package.json');
 const PackageName = pkg.name;
 const PluginName = pkg.displayName;
 
 class MotivPlatform {
   constructor(log, config, api) {
-    this.log = log;
-    this.api = api;
-    this.config = config || {};
-    this.accessories = new Map();
-    this.serviceType = Service.OccupancySensor;
+    platform = this;
+    platform.log = log;
+    platform.api = api;
+    platform.config = config || {};
+    platform.accessories = new Map();
+    platform.serviceType = Service.OccupancySensor;
 
-    this.motivSyncInterval = (this.config.syncSeconds || 120) * 1000;
-    this.motivApi = new MotivApi(this.config.account);
-    this.motivData = {
+    platform.motivSyncInterval = (platform.config.syncSeconds || 120) * 1000;
+    platform.motivApi = new MotivApi(platform.config.account);
+    platform.motivData = {
       isAwake: false,
     };
-    this.api.on('didFinishLaunching', () => {
+    platform.api.on('didFinishLaunching', () => {
       const now = new Date(Date.now());
-      if (!this.config.account) {
-        this.log.error(
+      if (!platform.config.account) {
+        platform.log.error(
           'Incomplete configuration. Run: "motiv-cli login <email>" for account configuration.'
         );
         return;
       } else {
-        const sessionExpiry = new Date(Date.parse(this.config.account.sessionExpiry));
+        const sessionExpiry = new Date(Date.parse(platform.config.account.sessionExpiry));
         if (sessionExpiry < now) {
-          this.log.error('Account session expired. Run "motiv-cli login <email>" to renew session');
+          platform.log.error(
+            'Account session expired. Run "motiv-cli login <email>" to renew session'
+          );
           return;
         }
-        this.setup();
-        this.updateAwakeStatus();
+        platform.setup();
+        platform.updateAwakeStatus();
       }
     });
   }
 
   updateAwakeStatus() {
-    this.log.info('Updating isAwake...');
+    platform.log.info('Updating isAwake...');
     try {
-      const self = this;
       const now = new Date(Date.now());
-      this.motivApi
+      platform.motivApi
         .getLastAwakening()
         .then((wokeTime) => {
           const nowDay = now
@@ -54,56 +56,56 @@ class MotivPlatform {
             .split('T')
             .shift();
           const isAwake = nowDay === wokeDay && wokeTime <= now;
-          this.log.info('Updated isAwake to be: %s', isAwake);
-          self.motivData.isAwake = isAwake;
-          self.updateSensors(Characteristic.OccupancyDetected, isAwake);
+          platform.log.info('Updated isAwake to be: %s', isAwake);
+          platform.motivData.isAwake = isAwake;
+          platform.updateSensors(Characteristic.OccupancyDetected, isAwake);
         })
         .catch((err) => {
-          this.log.error('Failed to update isAwake status: %s', (err.data || {}).error || err);
+          platform.log.error('Failed to update isAwake status: %s', (err.data || {}).error || err);
         });
     } catch (err) {
-      this.log.error(err);
+      platform.log.error(err);
     }
   }
 
   updateSensors(characteristic, type, value) {
-    this.log.info('Updated sensors');
+    platform.log.info('Updated sensors');
     try {
-      this.accessories.forEach((a) => {
+      platform.accessories.forEach((a) => {
         if (a.context.type === type) {
-          this.log.info('Updating %s to be: %s', a.displayName, value);
-          accessory.getService(this.serviceType).setCharacteristic(characteristic, value);
+          platform.log.info('Updating %s to be: %s', a.displayName, value);
+          accessory.getService(platform.serviceType).setCharacteristic(characteristic, value);
         }
       });
     } catch (err) {
-      this.log.error(err);
+      platform.log.error(err);
     }
   }
 
   setup() {
     try {
-      if (this.motivApi.needsAuth === false) {
-        setInterval(this.updateAwakeStatus, this.motivSyncInterval);
+      if (platform.motivApi.needsAuth === false) {
+        setInterval(platform.updateAwakeStatus, platform.motivSyncInterval);
         try {
-          this.addAccessory('awake');
+          platform.addAccessory('awake');
         } catch (err) {
-          this.log.error(err);
+          platform.log.error(err);
         }
       } else {
-        this.log.error('The Motiv API needs authentication. Run "motiv-cli login <email>"');
+        platform.log.error('The Motiv API needs authentication. Run "motiv-cli login <email>"');
       }
     } catch (err) {
-      this.log.error(err);
+      platform.log.error(err);
     }
   }
 
   createSensorAccessory(account, type, uuid) {
     try {
-      this.log.info(`Creating ${type} (${uuid}) sensor for ${account.userId}`);
+      platform.log.info(`Creating ${type} (${uuid}) sensor for ${account.userId}`);
 
       const accessory = new PlatformAccessory(type, uuid);
       accessory.context.type = type;
-      this.setupSensor(accessory, type);
+      platform.setupSensor(accessory, type);
 
       accessory
         .getService(Service.AccessoryInformation)
@@ -113,65 +115,69 @@ class MotivPlatform {
 
       return accessory;
     } catch (err) {
-      this.log.error(err);
+      platform.log.error(err);
     }
   }
 
   setupSensor(accessory, type) {
     try {
       accessory.displayName = `${type[0].toUpperCase()}${type.slice(1).toLowerCase()}`;
-      this.log.info('Setting up: %s (%s)', accessory.displayName, accessory.UUID);
+      platform.log.info('Setting up: %s (%s)', accessory.displayName, accessory.UUID);
 
-      let service = accessory.getService(this.serviceType);
+      let service = accessory.getService(platform.serviceType);
       if (service) {
         service.setCharacteristic(Characteristic.Name, accessory.displayName);
       } else {
-        service = accessory.addService(this.serviceType, accessory.displayName);
+        service = accessory.addService(platform.serviceType, accessory.displayName);
       }
 
       service.getCharacteristic(Characteristic.OccupancyDetected).on('get', (callback) => {
-        callback(null, this.motivData.isAwake);
+        callback(null, platform.motivData.isAwake);
       });
     } catch (err) {
-      this.log.error(err);
+      platform.log.error(err);
     }
   }
 
   // Called from device classes
   registerPlatformAccessory(accessory) {
     try {
-      this.log.info('Registering: %s (%s)', accessory.displayName, accessory.UUID);
-      this.api.registerPlatformAccessories(PackageName, PluginName, [accessory]);
+      platform.log.info('Registering: %s (%s)', accessory.displayName, accessory.UUID);
+      platform.api.registerPlatformAccessories(PackageName, PluginName, [accessory]);
     } catch (err) {
-      this.log.error(err);
+      platform.log.error(err);
     }
   }
 
   // Function invoked when homebridge tries to restore cached accessory
   configureAccessory(accessory) {
     try {
-      if (!this.accessories.has(accessory.UUID)) {
-        this.log.info('Configuring: %s (%s)', accessory.displayName, accessory.UUID);
+      if (!platform.accessories.has(accessory.UUID)) {
+        platform.log.info('Configuring: %s (%s)', accessory.displayName, accessory.UUID);
         accessory.context.type = accessory.context.type || 'awake';
-        this.setupSensor(accessory, accessory.context.type);
-        this.accessories.set(accessory.UUID, accessory);
+        platform.setupSensor(accessory, accessory.context.type);
+        platform.accessories.set(accessory.UUID, accessory);
       }
     } catch (err) {
-      this.log.error(err);
+      platform.log.error(err);
     }
   }
 
   addAccessory(accessoryName) {
     try {
-      const uuid = UUIDGen.generate(`Motiv_${this.config.account.userId}_${accessoryName}`);
-      if (!this.accessories.has(uuid)) {
-        const accessory = this.createSensorAccessory(this.config.account, accessoryName, uuid);
-        this.log.info('Adding: %s (%s)', accessory.displayName, accessory.UUID);
-        this.registerPlatformAccessory(accessory);
-        this.accessories.set(accessory.UUID, accessory);
+      const uuid = UUIDGen.generate(`Motiv_${platform.config.account.userId}_${accessoryName}`);
+      if (!platform.accessories.has(uuid)) {
+        const accessory = platform.createSensorAccessory(
+          platform.config.account,
+          accessoryName,
+          uuid
+        );
+        platform.log.info('Adding: %s (%s)', accessory.displayName, accessory.UUID);
+        platform.registerPlatformAccessory(accessory);
+        platform.accessories.set(accessory.UUID, accessory);
       }
     } catch (err) {
-      this.log.error(err);
+      platform.log.error(err);
     }
   }
 
@@ -180,11 +186,11 @@ class MotivPlatform {
       if (!accessory) {
         return;
       }
-      this.log.info('Removing: %s (%s)', accessory.displayName, accessory.UUID);
-      this.accessories.delete(accessory.UUID);
-      this.api.unregisterPlatformAccessories(PackageName, PluginName, [accessory]);
+      platform.log.info('Removing: %s (%s)', accessory.displayName, accessory.UUID);
+      platform.accessories.delete(accessory.UUID);
+      platform.api.unregisterPlatformAccessories(PackageName, PluginName, [accessory]);
     } catch (err) {
-      this.log.error(err);
+      platform.log.error(err);
     }
   }
 }
