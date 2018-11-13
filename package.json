@@ -1,0 +1,73 @@
+{
+  "name": "homebridge-motiv",
+  "displayName": "MotivPlatform",
+  "version": "0.0.1",
+  "description": "A homebridge plugin for Motiv fitness ring sensors",
+  "main": "index.js",
+  "author": "Gio Palacino <gio@palacino.net>",
+  "license": "MIT",
+  "private": false,
+  "keywords": [
+    "homebridge-plugin",
+    "motiv",
+    "iot",
+    "sensor",
+    "homebridge"
+  ],
+  "homepage": "https://github.com/giocirque/homebridge-motiv#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giocirque/homebridge-motiv.git"
+  },
+  "bugs": {
+    "url": "https://github.com/giocirque/homebridge-motiv/issues"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "directories": {
+    "lib": "lib"
+  },
+  "jest": {
+    "roots": [
+      "<rootDir>/tests"
+    ],
+    "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.jsx?$",
+    "collectCoverage": true,
+    "coverageDirectory": ".testing/coverage",
+    "collectCoverageFrom": [
+      "**/*.{js,jsx}",
+      "!**/node_modules/**",
+      "!**/vendor/**",
+      "!**/__mocks__/**"
+    ],
+    "resetMocks": true,
+    "transform": {
+      "^.+\\.jsx?$": "babel-jest"
+    },
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/__mocks__/"
+    ]
+  },
+  "engines": {
+    "homebridge": ">=0.2.0"
+  },
+  "bin": {
+    "motiv-cli": "./cli/index.js"
+  },
+  "devDependencies": {
+    "@babel/core": "7.1.2",
+    "@babel/preset-env": "7.1.0",
+    "babel-core": "^7.0.0-bridge.0",
+    "babel-jest": "23.6.0",
+    "jest": "23.6.0",
+    "regenerator-runtime": "0.12.1"
+  },
+  "dependencies": {
+    "axios": "0.18.0",
+    "commander": "2.19.0",
+    "configstore": "4.0.0",
+    "inquirer": "6.2.0"
+  }
+}
