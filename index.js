@@ -45,7 +45,15 @@ class MotivPlatform {
       this.motivApi
         .getLastAwakening()
         .then((wokeTime) => {
-          const isAwake = wokeTime <= now;
+          const nowDay = now
+            .toISOString()
+            .split('T')
+            .shift();
+          const wokeDay = wokeTime
+            .toISOString()
+            .split('T')
+            .shift();
+          const isAwake = nowDay === wokeDay && wokeTime <= now;
           this.log.info('Updated isAwake to be: %s (%s <= %s)', isAwake, wokeTime, now);
           self.motivData.isAwake = isAwake;
         })
