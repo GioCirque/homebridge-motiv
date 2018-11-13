@@ -38,7 +38,7 @@ class MotivPlatform {
   }
 
   updateAwakeStatus() {
-    this.log.info('Updating isAwake');
+    this.log.info('Updating isAwake...');
     try {
       const self = this;
       const now = new Date(Date.now());
@@ -54,12 +54,25 @@ class MotivPlatform {
             .split('T')
             .shift();
           const isAwake = nowDay === wokeDay && wokeTime <= now;
-          this.log.info('Updated isAwake to be: %s (%s <= %s)', isAwake, wokeTime, now);
+          this.log.info('Updated isAwake to be: %s', isAwake);
           self.motivData.isAwake = isAwake;
+          self.updateSensors(Characteristic.OccupancyDetected, isAwake);
         })
         .catch((err) => {
-          this.log.error('Failed to update isAwake status: %s', err.data || err);
+          this.log.error('Failed to update isAwake status: %s', (err.data || {}).error || err);
         });
+    } catch (err) {
+      this.log.error(err);
+    }
+  }
+
+  updateSensors(characteristic, type, value) {
+    try {
+      this.accessories.forEach((a) => {
+        if (a.context.type === type) {
+          accessory.getService(this.serviceType).setCharacteristic(characteristic, value);
+        }
+      });
     } catch (err) {
       this.log.error(err);
     }
