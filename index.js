@@ -56,7 +56,7 @@ class MotivPlatform {
             .split('T')
             .shift();
           const isAwake = nowDay === wokeDay && wokeTime <= now;
-          platform.log.info('Updated isAwake to be: %s', isAwake);
+          platform.log.debug('Updated isAwake to be: %s', isAwake);
           platform.motivData.isAwake = isAwake;
           platform.updateSensors(Characteristic.OccupancyDetected, isAwake);
         })
@@ -69,11 +69,11 @@ class MotivPlatform {
   }
 
   updateSensors(characteristic, type, value) {
-    platform.log.info('Updated sensors');
+    platform.log.debug('Updated sensors');
     try {
       platform.accessories.forEach((a) => {
         if (a.context.type === type) {
-          platform.log.info('Updating %s to be: %s', a.displayName, value);
+          platform.log.debug('Updating %s to be: %s', a.displayName, value);
           accessory.getService(platform.serviceType).setCharacteristic(characteristic, value);
         }
       });
@@ -101,7 +101,7 @@ class MotivPlatform {
 
   createSensorAccessory(account, type, uuid) {
     try {
-      platform.log.info(`Creating ${type} (${uuid}) sensor for ${account.userId}`);
+      platform.log.debug(`Creating ${type} (${uuid}) sensor for ${account.userId}`);
 
       const accessory = new PlatformAccessory(type, uuid);
       accessory.context.type = type;
@@ -122,7 +122,7 @@ class MotivPlatform {
   setupSensor(accessory, type) {
     try {
       accessory.displayName = `${type[0].toUpperCase()}${type.slice(1).toLowerCase()}`;
-      platform.log.info('Setting up: %s (%s)', accessory.displayName, accessory.UUID);
+      platform.log.debug('Setting up: %s (%s)', accessory.displayName, accessory.UUID);
 
       let service = accessory.getService(platform.serviceType);
       if (service) {
@@ -142,7 +142,7 @@ class MotivPlatform {
   // Called from device classes
   registerPlatformAccessory(accessory) {
     try {
-      platform.log.info('Registering: %s (%s)', accessory.displayName, accessory.UUID);
+      platform.log.debug('Registering: %s (%s)', accessory.displayName, accessory.UUID);
       platform.api.registerPlatformAccessories(PackageName, PluginName, [accessory]);
     } catch (err) {
       platform.log.error(err);
@@ -153,7 +153,7 @@ class MotivPlatform {
   configureAccessory(accessory) {
     try {
       if (!platform.accessories.has(accessory.UUID)) {
-        platform.log.info('Configuring: %s (%s)', accessory.displayName, accessory.UUID);
+        platform.log.debug('Configuring: %s (%s)', accessory.displayName, accessory.UUID);
         accessory.context.type = accessory.context.type || 'awake';
         platform.setupSensor(accessory, accessory.context.type);
         platform.accessories.set(accessory.UUID, accessory);
@@ -172,7 +172,7 @@ class MotivPlatform {
           accessoryName,
           uuid
         );
-        platform.log.info('Adding: %s (%s)', accessory.displayName, accessory.UUID);
+        platform.log.debug('Adding: %s (%s)', accessory.displayName, accessory.UUID);
         platform.registerPlatformAccessory(accessory);
         platform.accessories.set(accessory.UUID, accessory);
       }
@@ -186,7 +186,7 @@ class MotivPlatform {
       if (!accessory) {
         return;
       }
-      platform.log.info('Removing: %s (%s)', accessory.displayName, accessory.UUID);
+      platform.log.debug('Removing: %s (%s)', accessory.displayName, accessory.UUID);
       platform.accessories.delete(accessory.UUID);
       platform.api.unregisterPlatformAccessories(PackageName, PluginName, [accessory]);
     } catch (err) {
