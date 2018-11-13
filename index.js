@@ -10,10 +10,14 @@ class MotivPlatform {
     this.log = log;
     this.api = api;
     this.config = config || {};
-    this.motivApi = new MotivApi(this.config.account);
     this.accessories = [];
     this.serviceType = Service.OccupancySensor;
 
+    this.motivSyncInterval = (this.config.syncSeconds || 300) * 1000;
+    this.motivApi = new MotivApi(this.config.account);
+    this.motivData = {
+      isAwake: false,
+    };
     this.api.on('didFinishLaunching', () => {
       const now = new Date(Date.now());
       if (!this.config.account) {
@@ -32,10 +36,24 @@ class MotivPlatform {
     });
   }
 
+  updateAwakeStatus() {
+    const now = new Date(Date.now());
+    this.motivApi
+      .getLastAwakening()
+      .then((wokeTime) => {
+        console.info(`Updated isAwake to be ${wokeTime >= now}`);
+        self.motivData.isAwake = wokeTime <= now;
+      })
+      .catch((err) => {
+        console.error(err, `Failed to update isAwake status`);
+      });
+  }
+
   setup() {
     if (this.motivApi.needsAuth === false) {
       try {
         this.addAccessory('awake');
+        setInterval(this.updateAwakeStatus, this.motivSyncInterval);
       } catch (e) {
         console.error(e);
       }
@@ -72,18 +90,7 @@ class MotivPlatform {
     }
 
     service.getCharacteristic(Characteristic.OccupancyDetected).on('get', (callback) => {
-      const now = new Date(Date.now());
-      this.log.debug('[%s] On get', accessory.displayName);
-      this.motivApi
-        .getLastAwakening()
-        .then((wokeTime) => {
-          console.info(`Updated ${type} to be ${wokeTime >= now}`);
-          callback(null, wokeTime >= now);
-        })
-        .catch((err) => {
-          console.error(err, `Failed to update ${type} status`);
-          callback(err);
-        });
+      callback(null, this.motivData.isAwake);
     });
   }
 
