@@ -139,7 +139,7 @@ class MotivPlatform {
     try {
       const uuid = UUIDGen.generate(`Motiv_${this.config.account.userId}_${accessoryName}`);
       if (!this.accessories.has(uuid)) {
-        const accessory = this.createSensorAccessory(this.config.account, accessoryName);
+        const accessory = this.createSensorAccessory(this.config.account, accessoryName, uuid);
         this.log.info('Adding: %s (%s)', accessory.displayName, accessory.UUID);
         this.registerPlatformAccessory(accessory);
         this.accessories.set(accessory.UUID, accessory);
