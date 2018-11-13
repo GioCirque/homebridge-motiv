@@ -124,7 +124,7 @@ class MotivPlatform {
   // Function invoked when homebridge tries to restore cached accessory
   configureAccessory(accessory) {
     try {
-      if (!this.accessories.has(uuid)) {
+      if (!this.accessories.has(accessory.UUID)) {
         this.log.info('Configuring: %s (%s)', accessory.displayName, accessory.UUID);
         accessory.context.type = accessory.context.type || 'awake';
         this.setupSensor(accessory, accessory.context.type);
