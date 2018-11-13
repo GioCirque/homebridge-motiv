@@ -48,7 +48,8 @@ class MotivPlatform {
           self.motivData.isAwake = wokeTime <= now;
         })
         .catch((err) => {
-          this.log.error('Failed to update isAwake status: %s', JSON.stringify(err));
+          var stringify = require('json-stringify-safe');
+          this.log.error('Failed to update isAwake status: %s', stringify(err));
         });
     } catch (err) {
       this.log.error(err);
