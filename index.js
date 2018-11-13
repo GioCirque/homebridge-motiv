@@ -64,7 +64,7 @@ class MotivPlatform {
 
   createSensorAccessory(account, type) {
     const uuid = UUIDGen.generate(`Motiv_${account.userId}_${type}`);
-    this.log.info(`Creating ${type} sensor for ${account.userId}`);
+    this.log.info(`Creating ${type} (${uuid}) sensor for ${account.userId}`);
 
     const accessory = new PlatformAccessory(type, uuid);
     this.setupSensor(accessory, type);
@@ -80,7 +80,7 @@ class MotivPlatform {
 
   setupSensor(accessory, type) {
     accessory.displayName = `${type[0].toUpperCase()}${type.slice(1).toLowerCase()}`;
-    this.log.info('Setting up %s', accessory.displayName);
+    this.log.info('Setting up: %s (%s)', accessory.displayName, accessory.UUID);
 
     let service = accessory.getService(this.serviceType);
     if (service) {
@@ -96,18 +96,18 @@ class MotivPlatform {
 
   // Called from device classes
   registerPlatformAccessory(accessory) {
-    this.log.info('Registering %s', accessory.displayName);
+    this.log.info('Registering: %s (%s)', accessory.displayName, accessory.UUID);
     this.api.registerPlatformAccessories(PackageName, PluginName, [accessory]);
   }
 
   // Function invoked when homebridge tries to restore cached accessory
   configureAccessory(accessory) {
-    this.log.info('Configuring: %s', accessory.displayName);
+    this.log.info('Configuring: %s (%s)', accessory.displayName, accessory.UUID);
     this.accessories.push(accessory);
   }
 
   addAccessory(accessoryName) {
-    this.log.info('Adding: %s', accessoryName);
+    this.log.info('Adding: %s (%s)', accessory.displayName, accessory.UUID);
     const accessory = this.createSensorAccessory(this.config.account, accessoryName);
     this.registerPlatformAccessory(accessory);
     this.accessories.push(accessory);
@@ -118,7 +118,7 @@ class MotivPlatform {
       return;
     }
 
-    this.log.info('Removing: %s', accessory.displayName);
+    this.log.info('Removing: %s (%s)', accessory.displayName, accessory.UUID);
     this.accessories.delete(accessory);
     this.api.unregisterPlatformAccessories(PackageName, PluginName, [accessory]);
   }
