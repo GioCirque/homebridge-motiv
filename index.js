@@ -38,13 +38,13 @@ class MotivPlatform {
   }
 
   updateAwakeStatus() {
-    this.log.info('Updated isAwake');
+    this.log.info('Updating isAwake');
     try {
       const now = new Date(Date.now());
       this.motivApi
         .getLastAwakening()
         .then((wokeTime) => {
-          this.log.info('Updated isAwake to be %s', wokeTime >= now);
+          this.log.info('Updated isAwake to be: %s', wokeTime >= now);
           self.motivData.isAwake = wokeTime <= now;
         })
         .catch((err) => {
