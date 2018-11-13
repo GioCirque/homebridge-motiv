@@ -13,7 +13,7 @@ class MotivPlatform {
     this.accessories = new Map();
     this.serviceType = Service.OccupancySensor;
 
-    this.motivSyncInterval = (this.config.syncSeconds || 300) * 1000;
+    this.motivSyncInterval = (this.config.syncSeconds || 120) * 1000;
     this.motivApi = new MotivApi(this.config.account);
     this.motivData = {
       isAwake: false,
@@ -68,9 +68,9 @@ class MotivPlatform {
   setup() {
     try {
       if (this.motivApi.needsAuth === false) {
+        setInterval(this.updateAwakeStatus, this.motivSyncInterval);
         try {
           this.addAccessory('awake');
-          setInterval(this.updateAwakeStatus, this.motivSyncInterval);
         } catch (err) {
           this.log.error(err);
         }
