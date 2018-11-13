@@ -67,9 +67,11 @@ class MotivPlatform {
   }
 
   updateSensors(characteristic, type, value) {
+    this.log.info('Updated sensors');
     try {
       this.accessories.forEach((a) => {
         if (a.context.type === type) {
+          this.log.info('Updating %s to be: %s', a.displayName, value);
           accessory.getService(this.serviceType).setCharacteristic(characteristic, value);
         }
       });
