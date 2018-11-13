@@ -43,14 +43,14 @@ class MotivPlatform {
       this.motivApi
         .getLastAwakening()
         .then((wokeTime) => {
-          console.info(`Updated isAwake to be ${wokeTime >= now}`);
+          this.log.info(`Updated isAwake to be ${wokeTime >= now}`);
           self.motivData.isAwake = wokeTime <= now;
         })
         .catch((err) => {
-          console.error(err, `Failed to update isAwake status`);
+          this.log.error(err, `Failed to update isAwake status`);
         });
     } catch (err) {
-      console.error(err);
+      this.log.error(err);
     }
   }
 
@@ -61,13 +61,13 @@ class MotivPlatform {
           this.addAccessory('awake');
           setInterval(this.updateAwakeStatus, this.motivSyncInterval);
         } catch (err) {
-          console.error(err);
+          this.log.error(err);
         }
       } else {
-        console.error('The Motiv API needs authentication. Run "motiv-cli login <email>"');
+        this.log.error('The Motiv API needs authentication. Run "motiv-cli login <email>"');
       }
     } catch (err) {
-      console.error(err);
+      this.log.error(err);
     }
   }
 
@@ -87,7 +87,7 @@ class MotivPlatform {
 
       return accessory;
     } catch (err) {
-      console.error(err);
+      this.log.error(err);
     }
   }
 
@@ -107,7 +107,7 @@ class MotivPlatform {
         callback(null, this.motivData.isAwake);
       });
     } catch (err) {
-      console.error(err);
+      this.log.error(err);
     }
   }
 
@@ -117,16 +117,12 @@ class MotivPlatform {
       this.log.info('Registering: %s (%s)', accessory.displayName, accessory.UUID);
       this.api.registerPlatformAccessories(PackageName, PluginName, [accessory]);
     } catch (err) {
-      console.error(err);
+      this.log.error(err);
     }
   }
 
   // Function invoked when homebridge tries to restore cached accessory
   configureAccessory(accessory) {
-    this.accessories.set(accessory.UUID, accessory);
-    this.removeAccessory(accessory);
-    return;
-
     try {
       if (!this.accessories.has(accessory.UUID)) {
         this.log.info('Configuring: %s (%s)', accessory.displayName, accessory.UUID);
@@ -135,13 +131,13 @@ class MotivPlatform {
         this.accessories.set(accessory.UUID, accessory);
       }
     } catch (err) {
-      console.error(err);
+      this.log.error(err);
     }
   }
 
   addAccessory(accessoryName) {
     try {
-      const uuid = UUIDGen.generate(`Motiv_${account.userId}_${accessoryName}`);
+      const uuid = UUIDGen.generate(`Motiv_${this.config.account.userId}_${accessoryName}`);
       if (!this.accessories.has(uuid)) {
         this.log.info('Adding: %s (%s)', accessory.displayName, accessory.UUID);
         const accessory = this.createSensorAccessory(this.config.account, accessoryName);
@@ -149,7 +145,7 @@ class MotivPlatform {
         this.accessories.set(accessory.UUID, accessory);
       }
     } catch (err) {
-      console.error(err);
+      this.log.error(err);
     }
   }
 
@@ -162,7 +158,7 @@ class MotivPlatform {
       this.accessories.delete(accessory.UUID);
       this.api.unregisterPlatformAccessories(PackageName, PluginName, [accessory]);
     } catch (err) {
-      console.error(err);
+      this.log.error(err);
     }
   }
 }
