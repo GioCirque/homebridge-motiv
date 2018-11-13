@@ -40,6 +40,7 @@ class MotivPlatform {
   updateAwakeStatus() {
     this.log.info('Updating isAwake');
     try {
+      const self = this;
       const now = new Date(Date.now());
       this.motivApi
         .getLastAwakening()
