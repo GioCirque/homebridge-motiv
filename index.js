@@ -10,7 +10,7 @@ class MotivPlatform {
     this.log = log;
     this.api = api;
     this.config = config || {};
-    this.accessories = [];
+    this.accessories = new Map();
     this.serviceType = Service.OccupancySensor;
 
     this.motivSyncInterval = (this.config.syncSeconds || 300) * 1000;
@@ -62,11 +62,11 @@ class MotivPlatform {
     }
   }
 
-  createSensorAccessory(account, type) {
-    const uuid = UUIDGen.generate(`Motiv_${account.userId}_${type}`);
+  createSensorAccessory(account, type, uuid) {
     this.log.info(`Creating ${type} (${uuid}) sensor for ${account.userId}`);
 
     const accessory = new PlatformAccessory(type, uuid);
+    accessory.context.type = type;
     this.setupSensor(accessory, type);
 
     accessory
@@ -103,14 +103,19 @@ class MotivPlatform {
   // Function invoked when homebridge tries to restore cached accessory
   configureAccessory(accessory) {
     this.log.info('Configuring: %s (%s)', accessory.displayName, accessory.UUID);
-    this.accessories.push(accessory);
+    accessory.context.type = accessory.context.type || 'awake';
+    this.setupSensor(accessory, accessory.context.type);
+    this.accessories.set(accessory.UUID, accessory);
   }
 
   addAccessory(accessoryName) {
-    this.log.info('Adding: %s (%s)', accessory.displayName, accessory.UUID);
-    const accessory = this.createSensorAccessory(this.config.account, accessoryName);
-    this.registerPlatformAccessory(accessory);
-    this.accessories.push(accessory);
+    const uuid = UUIDGen.generate(`Motiv_${account.userId}_${accessoryName}`);
+    if (!this.accessories.has(uuid)) {
+      this.log.info('Adding: %s (%s)', accessory.displayName, accessory.UUID);
+      const accessory = this.createSensorAccessory(this.config.account, accessoryName);
+      this.registerPlatformAccessory(accessory);
+      this.accessories.set(accessory.UUID, accessory);
+    }
   }
 
   removeAccessory(accessory) {
@@ -119,7 +124,7 @@ class MotivPlatform {
     }
 
     this.log.info('Removing: %s (%s)', accessory.displayName, accessory.UUID);
-    this.accessories.delete(accessory);
+    this.accessories.delete(accessory.UUID);
     this.api.unregisterPlatformAccessories(PackageName, PluginName, [accessory]);
   }
 }
