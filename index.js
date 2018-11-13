@@ -48,7 +48,7 @@ class MotivPlatform {
           self.motivData.isAwake = wokeTime <= now;
         })
         .catch((err) => {
-          this.log.error('Failed to update isAwake status: %s', err);
+          this.log.error('Failed to update isAwake status: %s', err.stack || err.message);
         });
     } catch (err) {
       this.log.error(err);
