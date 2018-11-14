@@ -89,7 +89,7 @@ class MotivPlatform {
       platform.accessories.forEach((a) => {
         if (a.context.type === type) {
           platform.log.debug('Updating %s to be: %s', a.displayName, value);
-          accessory.getService(platform.serviceType).setCharacteristic(characteristic, value);
+          a.getService(platform.serviceType).setCharacteristic(characteristic, value);
         }
       });
     } catch (err) {
