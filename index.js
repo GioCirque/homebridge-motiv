@@ -1,10 +1,12 @@
-const chalk = require('chalk');
 const { MotivApi } = require('./lib/motiv');
 
 let PlatformAccessory, Characteristic, Service, UUIDGen, platform;
 const pkg = require('./package.json');
 const PackageName = pkg.name;
 const PluginName = pkg.displayName;
+
+const chalk = require('chalk');
+const ctx = new chalk.constructor({ enabled: false, level: 3 });
 
 function getLogHeader() {
   const now = new Date(Date.now());
