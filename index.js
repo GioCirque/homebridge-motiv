@@ -56,9 +56,24 @@ class MotivPlatform {
             .split('T')
             .shift();
           const isAwake = nowDay === wokeDay && wokeTime <= now;
-          platform.log.debug('Updated isAwake to be: %s', isAwake);
-          platform.motivData.isAwake = isAwake;
-          platform.updateSensors(Characteristic.OccupancyDetected, isAwake);
+          if (platform.motivData.isAwake !== isAwake) {
+            platform.log.info(
+              'Updated isAwake to be: %s (%s === %s && %s <= %s)',
+              isAwake,
+              nowDay,
+              wokeDay,
+              wokeTime
+                .toISOString()
+                .split('T')
+                .pop(),
+              now
+                .toISOString()
+                .split('T')
+                .pop()
+            );
+            platform.motivData.isAwake = isAwake;
+            platform.updateSensors(Characteristic.OccupancyDetected, isAwake);
+          }
         })
         .catch((err) => {
           platform.log.error('Failed to update isAwake status: %s', (err.data || {}).error || err);
