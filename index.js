@@ -58,7 +58,6 @@ class MotivPlatform {
   }
 
   updateAwakeStatus() {
-    platform.log.debug('Updating isAwake...');
     try {
       const now = new Date(Date.now());
       platform.motivApi
@@ -101,11 +100,9 @@ class MotivPlatform {
   }
 
   updateSensors(characteristic, type, value) {
-    platform.log.debug('Updated sensors');
     try {
       platform.accessories.forEach((a) => {
         if (a.context.type === type) {
-          platform.log.debug('Updating %s to be: %s', a.displayName, value);
           a.getService(platform.serviceType).setCharacteristic(characteristic, value);
         }
       });
@@ -133,8 +130,6 @@ class MotivPlatform {
 
   createSensorAccessory(account, type, uuid) {
     try {
-      platform.log.debug(`Creating ${type} (${uuid}) sensor for ${account.userId}`);
-
       const accessory = new PlatformAccessory(type, uuid);
       accessory.context.type = type;
       platform.setupSensor(accessory, type);
@@ -154,7 +149,6 @@ class MotivPlatform {
   setupSensor(accessory, type) {
     try {
       accessory.displayName = `${type[0].toUpperCase()}${type.slice(1).toLowerCase()}`;
-      platform.log.debug('Setting up: %s (%s)', accessory.displayName, accessory.UUID);
 
       let service = accessory.getService(platform.serviceType);
       if (service) {
@@ -174,7 +168,6 @@ class MotivPlatform {
   // Called from device classes
   registerPlatformAccessory(accessory) {
     try {
-      platform.log.debug('Registering: %s (%s)', accessory.displayName, accessory.UUID);
       platform.api.registerPlatformAccessories(PackageName, PluginName, [accessory]);
     } catch (err) {
       platform.log.error(err);
@@ -185,7 +178,6 @@ class MotivPlatform {
   configureAccessory(accessory) {
     try {
       if (!platform.accessories.has(accessory.UUID)) {
-        platform.log.debug('Configuring: %s (%s)', accessory.displayName, accessory.UUID);
         accessory.context.type = accessory.context.type || 'awake';
         platform.setupSensor(accessory, accessory.context.type);
         platform.accessories.set(accessory.UUID, accessory);
@@ -204,7 +196,6 @@ class MotivPlatform {
           accessoryName,
           uuid
         );
-        platform.log.debug('Adding: %s (%s)', accessory.displayName, accessory.UUID);
         platform.registerPlatformAccessory(accessory);
         platform.accessories.set(accessory.UUID, accessory);
       }
@@ -218,7 +209,6 @@ class MotivPlatform {
       if (!accessory) {
         return;
       }
-      platform.log.debug('Removing: %s (%s)', accessory.displayName, accessory.UUID);
       platform.accessories.delete(accessory.UUID);
       platform.api.unregisterPlatformAccessories(PackageName, PluginName, [accessory]);
     } catch (err) {
