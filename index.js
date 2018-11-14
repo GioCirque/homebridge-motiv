@@ -40,7 +40,7 @@ class MotivPlatform {
     });
   }
 
-  updateAwakeStatus(platform) {
+  updateAwakeStatus() {
     platform.log.debug('Updating isAwake...');
     try {
       const now = new Date(Date.now());
@@ -72,7 +72,7 @@ class MotivPlatform {
                 .pop()
             );
             platform.motivData.isAwake = isAwake;
-            platform.updateSensors(platform, Characteristic.OccupancyDetected, 'awake', isAwake);
+            platform.updateSensors(Characteristic.OccupancyDetected, 'awake', isAwake);
           }
         })
         .catch((err) => {
@@ -83,7 +83,7 @@ class MotivPlatform {
     }
   }
 
-  updateSensors(platform, characteristic, type, value) {
+  updateSensors(characteristic, type, value) {
     platform.log.debug('Updated sensors');
     try {
       platform.accessories.forEach((a) => {
@@ -100,7 +100,7 @@ class MotivPlatform {
   setup() {
     try {
       if (platform.motivApi.needsAuth === false) {
-        setInterval(platform.updateAwakeStatus, platform.motivSyncInterval, platform);
+        setInterval(platform.updateAwakeStatus, platform.motivSyncInterval);
         try {
           platform.addAccessory('awake');
         } catch (err) {
