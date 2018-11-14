@@ -8,7 +8,7 @@ const PluginName = pkg.displayName;
 
 function getLogHeader() {
   const now = new Date(Date.now());
-  color.return`[${now.toLocaleDateString()}, ${now.toLocaleTimeString()}] ${color.purple(
+  return `[${now.toLocaleDateString()}, ${now.toLocaleTimeString()}] ${color.purple(
     `[${PluginName}]`
   )}`;
 }
