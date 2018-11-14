@@ -1,3 +1,4 @@
+const chalk = require('chalk');
 const { MotivApi } = require('./lib/motiv');
 
 let PlatformAccessory, Characteristic, Service, UUIDGen, platform;
@@ -5,10 +6,21 @@ const pkg = require('./package.json');
 const PackageName = pkg.name;
 const PluginName = pkg.displayName;
 
+function getLogHeader() {
+  const now = new Date(Date.now());
+  return chalk`[${now.toLocaleDateString()}, ${now.toLocaleTimeString()}] {rgb(250, 92, 92) [${PluginName}]}`;
+}
+
 class MotivPlatform {
   constructor(log, config, api) {
     platform = this;
-    platform.log = log;
+    platform.log = {
+      debug: (message, ...args) => console.debug(`${getLogHeader()} {gray ${message}}`, args),
+      info: (message, ...args) => console.info(`${getLogHeader()} {blue ${message}}`, args),
+      warn: (message, ...args) => console.warn(`${getLogHeader()} {yellow ${message}}`, args),
+      error: (message, ...args) => console.error(`${getLogHeader()} {red ${message}}`, args),
+      log: (message, ...args) => console.log(`${getLogHeader()} ${message}`, args),
+    };
     platform.api = api;
     platform.config = config || {};
     platform.accessories = new Map();
