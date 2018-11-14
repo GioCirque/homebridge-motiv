@@ -66,6 +66,7 @@
   },
   "dependencies": {
     "axios": "0.18.0",
+    "bash-color": "0.0.4",
     "chalk": "2.4.1",
     "commander": "2.19.0",
     "configstore": "4.0.0",

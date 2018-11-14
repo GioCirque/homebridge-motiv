@@ -1,3 +1,4 @@
+const color = require('bash-color');
 const { MotivApi } = require('./lib/motiv');
 
 let PlatformAccessory, Characteristic, Service, UUIDGen, platform;
@@ -5,12 +6,11 @@ const pkg = require('./package.json');
 const PackageName = pkg.name;
 const PluginName = pkg.displayName;
 
-const chalk = require('chalk');
-const ctx = new chalk.constructor({ enabled: false, level: 3 });
-
 function getLogHeader() {
   const now = new Date(Date.now());
-  return chalk`[${now.toLocaleDateString()}, ${now.toLocaleTimeString()}] {rgb(250, 92, 92) [${PluginName}]}`;
+  color.return`[${now.toLocaleDateString()}, ${now.toLocaleTimeString()}] ${color.purple(
+    `[${PluginName}]`
+  )}`;
 }
 
 class MotivPlatform {
@@ -18,12 +18,12 @@ class MotivPlatform {
     platform = this;
     platform.log = {
       debug: (message, ...args) =>
-        console.debug(chalk`${getLogHeader()} {gray ${message}}`, ...args),
-      info: (message, ...args) => console.info(chalk`${getLogHeader()} {blue ${message}}`, ...args),
+        console.debug(`${getLogHeader()} ${color.white(message)}`, ...args),
+      info: (message, ...args) => console.info(`${getLogHeader()} ${color.blue(message)}`, ...args),
       warn: (message, ...args) =>
-        console.warn(chalk`${getLogHeader()} {yellow ${message}}`, ...args),
+        console.warn(`${getLogHeader()} ${color.yellow(message)}`, ...args),
       error: (message, ...args) =>
-        console.error(chalk`${getLogHeader()} {red ${message}}`, ...args),
+        console.error(`${getLogHeader()} ${color.red(message)}`, ...args),
       log: (message, ...args) => console.log(`${getLogHeader()} ${message}`, ...args),
     };
     platform.api = api;
