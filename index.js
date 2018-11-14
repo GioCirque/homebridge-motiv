@@ -17,11 +17,14 @@ class MotivPlatform {
   constructor(log, config, api) {
     platform = this;
     platform.log = {
-      debug: (message, ...args) => log.debug(`${getLogHeader()} ${color.white(message)}`, ...args),
-      info: (message, ...args) => log.info(`${getLogHeader()} ${color.blue(message)}`, ...args),
-      warn: (message, ...args) => log.warn(`${getLogHeader()} ${color.yellow(message)}`, ...args),
-      error: (message, ...args) => log.error(`${getLogHeader()} ${color.red(message)}`, ...args),
-      log: (message, ...args) => log.log(`${getLogHeader()} ${message}`, ...args),
+      debug: (message, ...args) =>
+        console.debug(`${getLogHeader()} ${color.white(message)}`, ...args),
+      info: (message, ...args) => console.info(`${getLogHeader()} ${color.blue(message)}`, ...args),
+      warn: (message, ...args) =>
+        console.warn(`${getLogHeader()} ${color.yellow(message)}`, ...args),
+      error: (message, ...args) =>
+        console.error(`${getLogHeader()} ${color.red(message)}`, ...args),
+      log: (message, ...args) => console.log(`${getLogHeader()} ${message}`, ...args),
     };
     platform.api = api;
     platform.config = config || {};
