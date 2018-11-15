@@ -1,4 +1,5 @@
 const color = require('bash-color');
+const { getUTCNowDate } = require('./lib/utils');
 const { MotivApi } = require('./lib/motiv');
 
 let PlatformAccessory, Characteristic, Service, UUIDGen, platform;
@@ -7,7 +8,7 @@ const PackageName = pkg.name;
 const PluginName = pkg.displayName;
 
 function getLogHeader() {
-  const now = new Date(Date.now());
+  const now = new Date();
   return `[${now.toLocaleDateString()}, ${now.toLocaleTimeString()}] ${color.purple(
     `[${PluginName}]`
   )}`;
@@ -37,7 +38,7 @@ class MotivPlatform {
       isAwake: false,
     };
     platform.api.on('didFinishLaunching', () => {
-      const now = new Date(Date.now());
+      const now = new Date();
       if (!platform.config.account) {
         platform.log.error(
           'Incomplete configuration. Run: "motiv-cli login <email>" for account configuration.'
@@ -59,7 +60,7 @@ class MotivPlatform {
 
   updateAwakeStatus() {
     try {
-      const now = new Date(Date.now());
+      const now = new Date();
       platform.motivApi
         .getLastAwakening()
         .then((wokeTime) => {
