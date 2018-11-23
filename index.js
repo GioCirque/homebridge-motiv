@@ -1,5 +1,5 @@
 const color = require('bash-color');
-const { getUTCNowDate } = require('./lib/utils');
+const { getUTCNowDate, splitDateAndTime } = require('./lib/utils');
 const { MotivApi } = require('./lib/motiv');
 
 let PlatformAccessory, Characteristic, Service, UUIDGen, platform;
@@ -38,7 +38,7 @@ class MotivPlatform {
       isAwake: false,
     };
     platform.api.on('didFinishLaunching', () => {
-      const now = new Date();
+      const now = getUTCNowDate();
       if (!platform.config.account) {
         platform.log.error(
           'Incomplete configuration. Run: "motiv-cli login <email>" for account configuration.'
@@ -60,34 +60,22 @@ class MotivPlatform {
 
   updateAwakeStatus() {
     try {
-      const now = new Date();
+      const now = getUTCNowDate();
       platform.motivApi
         .getLastAwakening()
         .then((wokeTime) => {
-          const nowDay = now
-            .toISOString()
-            .split('T')
-            .shift();
-          const wokeDay = wokeTime
-            .toISOString()
-            .split('T')
-            .shift();
-          const isAwake = nowDay === wokeDay && wokeTime <= now;
+          const { date: nowDate, time: nowTime } = splitDateAndTime(now);
+          const { date: wakeDate, time: wakeTime } = splitDateAndTime(wokeTime);
+          const isAwake = nowDate === wokeDate && wokeTime <= now;
+          platform.log.info(
+            'Updated isAwake to be: %s (%s === %s && %s <= %s)',
+            isAwake,
+            nowDate,
+            wakeDate,
+            wakeTime,
+            nowTime
+          );
           if (platform.motivData.isAwake !== isAwake) {
-            platform.log.info(
-              'Updated isAwake to be: %s (%s === %s && %s <= %s)',
-              isAwake,
-              nowDay,
-              wokeDay,
-              wokeTime
-                .toISOString()
-                .split('T')
-                .pop(),
-              now
-                .toISOString()
-                .split('T')
-                .pop()
-            );
             platform.motivData.isAwake = isAwake;
             platform.updateSensors(Characteristic.OccupancyDetected, 'awake', isAwake);
           }
