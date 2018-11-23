@@ -66,7 +66,7 @@ class MotivPlatform {
         .then((wokeTime) => {
           const { date: nowDate, time: nowTime } = splitDateAndTime(now);
           const { date: wakeDate, time: wakeTime } = splitDateAndTime(wokeTime);
-          const isAwake = nowDate === wokeDate && wokeTime <= now;
+          const isAwake = nowDate === wakeDate && wokeTime <= now;
           platform.log.info(
             'Updated isAwake to be: %s (%s === %s && %s <= %s)',
             isAwake,
