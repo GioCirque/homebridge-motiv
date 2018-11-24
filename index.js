@@ -67,15 +67,15 @@ class MotivPlatform {
           const { date: nowDate, time: nowTime } = splitDateAndTime(now);
           const { date: wakeDate, time: wakeTime } = splitDateAndTime(wokeTime);
           const isAwake = nowDate === wakeDate && wokeTime <= now;
-          platform.log.info(
-            'Updated isAwake to be: %s (%s === %s && %s <= %s)',
-            isAwake,
-            nowDate,
-            wakeDate,
-            wakeTime,
-            nowTime
-          );
           if (platform.motivData.isAwake !== isAwake) {
+            platform.log.info(
+              'Updated isAwake to be: %s (%s === %s && %s <= %s)',
+              isAwake,
+              nowDate,
+              wakeDate,
+              wakeTime,
+              nowTime
+            );
             platform.motivData.isAwake = isAwake;
             platform.updateSensors(Characteristic.OccupancyDetected, 'awake', isAwake);
           }
