@@ -152,7 +152,7 @@ describe('Motiv API Tests', () => {
       return motivApi.getLastAwakening().then((lastAwake) => {
         const timeZoneOffset = new Date().getTimezoneOffset() * 60;
         expect(lastAwake).toBeDefined();
-        expect(lastAwake.getTime() / 1000 + timeZoneOffset).toEqual(1541424202);
+        expect(lastAwake.getTime() / 1000 + timeZoneOffset).toEqual(1541445802);
       });
     });
   });
