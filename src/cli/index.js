@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-const chalk = require('chalk').default;
 const program = require('commander');
 const configstore = require('configstore');
 const { maybeAuthenticate } = require('./authenticate');

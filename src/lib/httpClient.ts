@@ -1,6 +1,6 @@
-const { request } = require('https');
+import { request } from 'https';
 
-function secureGet(host, path, headers) {
+export function secureGet(host, path, headers) {
   const safeHeaders = headers || {};
   const useHeaders = {
     ...safeHeaders,
@@ -17,7 +17,11 @@ function secureGet(host, path, headers) {
       (res) => {
         res.on('data', (d) => {
           if (res.statusCode === 200) {
-            resolve(JSON.parse(d.toString()), res.headers, res);
+            resolve({
+              data: JSON.parse(d.toString()),
+              headers: res.headers,
+              response: res,
+            });
           } else {
             reject({
               data: JSON.parse(d.toString()),
@@ -35,7 +39,7 @@ function secureGet(host, path, headers) {
   });
 }
 
-function securePost(host, path, data, headers) {
+export function securePost(host, path, data, headers) {
   const postData = JSON.stringify(data);
   const safeHeaders = headers || {};
   const useHeaders = {
@@ -55,7 +59,11 @@ function securePost(host, path, data, headers) {
       (res) => {
         res.on('data', (d) => {
           if (res.statusCode === 200) {
-            resolve(JSON.parse(d.toString()), res.headers, res);
+            resolve({
+              data: JSON.parse(d.toString()),
+              headers: res.headers,
+              response: res,
+            });
           } else {
             reject({
               data: JSON.parse(d.toString()),
@@ -73,8 +81,3 @@ function securePost(host, path, data, headers) {
     req.end();
   });
 }
-
-module.exports = {
-  secureGet,
-  securePost,
-};

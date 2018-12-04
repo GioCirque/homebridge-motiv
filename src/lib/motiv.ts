@@ -1,5 +1,5 @@
-const { secureGet, securePost } = require('./httpClient');
-const { isEmptyOrUndef } = require('./utils');
+import { secureGet, securePost } from './httpClient';
+import { isEmptyOrUndef } from './utils';
 
 const motivApiHost = 'motiv-api.prod.mymotiv.com';
 const motivHeaders = {
@@ -21,10 +21,35 @@ const motivPaths = {
 };
 const milliseconds = 1000;
 
-class MotivApi {
+interface SleepEvent {
+  utcEnd: number;
+  sleepMinutes: number;
+}
+interface HeartRateRecord {
+  utcStart: number;
+  bpm: number;
+  utcEnd: number;
+  isAverage: number;
+  isAsync: number;
+}
+
+export class MotivApi {
+  private _needsAuth: boolean = true;
+  private userId: string;
+  private sessionToken: string;
+  private sessionExpiry: Date;
+  private authenticatedHeaders: { [key: string]: string };
+
+  private profileData: any;
+  private lastSleepEvent: SleepEvent;
+  private lastHeartRateRecord: HeartRateRecord;
+
   constructor(authData) {
-    this.needsAuth = true;
     this.processAuthData(authData);
+  }
+
+  get needsAuth() {
+    return this._needsAuth;
   }
 
   processAuthData(authData) {
@@ -38,13 +63,13 @@ class MotivApi {
     this.sessionToken = safeAuthData.sessionToken;
     this.sessionExpiry = new Date(Date.parse(safeAuthData.sessionExpiry));
 
-    this.needsAuth =
+    this._needsAuth =
       isEmptyOrUndef(this.userId) ||
       isEmptyOrUndef(this.sessionToken) ||
       isEmptyOrUndef(this.sessionExpiry) ||
       this.sessionExpiry < now;
 
-    if (!this.needsAuth) {
+    if (!this._needsAuth) {
       this.authenticatedHeaders = {
         ...motivHeaders,
         'X-Parse-Session-Token': this.sessionToken,
@@ -78,10 +103,10 @@ class MotivApi {
     });
   }
 
-  getLastHeartRateRecord() {
+  getLastHeartRateRecord(): Promise<HeartRateRecord> {
     const self = this;
     return new Promise((resolve, reject) => {
-      if (self.needsAuth === true) {
+      if (self._needsAuth === true) {
         reject(new Error('Authentication required'));
         return;
       }
@@ -97,7 +122,7 @@ class MotivApi {
         motivPaths.heartRate,
         heartRateRequestData,
         self.authenticatedHeaders
-      ).then((heartRateResultData) => {
+      ).then((heartRateResultData: any) => {
         if (
           heartRateResultData &&
           heartRateResultData.results &&
@@ -120,10 +145,10 @@ class MotivApi {
     });
   }
 
-  getLastSleepEvent() {
+  getLastSleepEvent(): Promise<SleepEvent> {
     const self = this;
     return new Promise((resolve, reject) => {
-      if (self.needsAuth === true) {
+      if (self._needsAuth === true) {
         reject(new Error('Authentication required'));
         return;
       }
@@ -135,7 +160,7 @@ class MotivApi {
         where: { user: { __type: 'Pointer', className: '_User', objectId: self.userId } },
       };
       securePost(motivApiHost, motivPaths.sleepEvent, sleepRequestData, self.authenticatedHeaders)
-        .then((sleepResultData) => {
+        .then((sleepResultData: any) => {
           if (sleepResultData && sleepResultData.results && sleepResultData.results.length > 0) {
             self.lastSleepEvent = sleepResultData.results[0];
           } else {
@@ -150,7 +175,7 @@ class MotivApi {
   getUserProfile() {
     const self = this;
     return new Promise((resolve, reject) => {
-      if (self.needsAuth === true) {
+      if (self._needsAuth === true) {
         reject(new Error('Authentication required'));
         return;
       }
@@ -170,7 +195,7 @@ class MotivApi {
         profileRequestData,
         self.authenticatedHeaders
       )
-        .then((profileResultData) => {
+        .then((profileResultData: any) => {
           const firstResult = profileResultData.results[0];
           self.profileData = firstResult;
           resolve(self.profileData);
@@ -183,7 +208,7 @@ class MotivApi {
     const self = this;
     const authRequestData = { _method: 'GET', username: username, password: password };
     return securePost(motivApiHost, motivPaths.login, authRequestData, motivHeaders).then(
-      (authResultData) => {
+      (authResultData: any) => {
         self.authenticatedHeaders = {
           ...motivHeaders,
           'X-Parse-Session-Token': authResultData.sessionToken,
@@ -191,7 +216,7 @@ class MotivApi {
 
         // Load session expiration data
         return secureGet(motivApiHost, motivPaths.session, self.authenticatedHeaders).then(
-          (sessionResultData) => {
+          (sessionResultData: any) => {
             self.processAuthData({
               userId: authResultData.objectId,
               sessionToken: authResultData.sessionToken,
@@ -204,7 +229,3 @@ class MotivApi {
     );
   }
 }
-
-module.exports = {
-  MotivApi,
-};

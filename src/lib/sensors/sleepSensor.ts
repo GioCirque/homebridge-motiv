@@ -1,30 +1,28 @@
-const { MotivPlatform } = require('../platform');
-const { toTitleCase, getUTCNowDate, splitDateAndTime } = require('../utils');
-const { Logger } = require('../logger');
+import { MotivPlatform } from '../platform';
+import { toTitleCase, getUTCNowDate, splitDateAndTime } from '../utils';
+import { Logger } from '../logger';
 
-/*
- * A Motiv sensor for reporting sleep status
- */
-class SleepSensor {
-  /**
-   * Creates a new instance of the sensor with a platform reference
-   * @param {MotivPlatform} platform
-   */
-  constructor(platform, uuid, accessory) {
+export class SleepSensor {
+  private uuid: string;
+  private platform: MotivPlatform;
+  private serviceType: any;
+  private accessoryType: string;
+  private accessory: any;
+  private isAwake: boolean = true;
+
+  constructor(platform: MotivPlatform, uuid: string, accessory: any = undefined) {
     this.uuid = uuid;
     this.platform = platform;
-    this.serviceType = platform.Service.OccupancySensor;
+    this.serviceType = MotivPlatform.Service.OccupancySensor;
     this.accessoryType = SleepSensor.accessoryType();
     this.accessory = !!accessory ? this.setup(accessory) : this.create();
-
-    this.isAwake = true;
   }
 
-  static accessoryType() {
+  static accessoryType(): string {
     return 'awake';
   }
 
-  update() {
+  update(): void {
     const self = this;
     const now = getUTCNowDate();
     this.platform.log.debug(`Updating ${this.accessory.displayName}`);
@@ -38,7 +36,7 @@ class SleepSensor {
           self.isAwake = isAwake;
           self.accessory
             .getService(self.serviceType)
-            .setCharacteristic(self.platform.Characteristic.OccupancyDetected, isAwake);
+            .setCharacteristic(MotivPlatform.Characteristic.OccupancyDetected, isAwake);
 
           self.platform.log.debug(
             'Updated isAwake to be: %s (%s === %s && %s <= %s)',
@@ -59,7 +57,7 @@ class SleepSensor {
   }
 
   create() {
-    return this.setup(new this.platform.PlatformAccessory(this.accessoryType, this.uuid));
+    return this.setup(new MotivPlatform.PlatformAccessory(this.accessoryType, this.uuid));
   }
 
   setup(accessory) {
@@ -68,24 +66,24 @@ class SleepSensor {
       accessory.displayName = toTitleCase(this.accessoryType);
       accessory.context.type = this.accessoryType;
       accessory
-        .getService(this.platform.Service.AccessoryInformation)
-        .setCharacteristic(this.platform.Characteristic.Manufacturer, 'Motiv Homebridge Sensors')
-        .setCharacteristic(this.platform.Characteristic.Model, `Motiv ${this.accessoryType} sensor`)
+        .getService(MotivPlatform.Service.AccessoryInformation)
+        .setCharacteristic(MotivPlatform.Characteristic.Manufacturer, 'Motiv Homebridge Sensors')
+        .setCharacteristic(MotivPlatform.Characteristic.Model, `Motiv ${this.accessoryType} sensor`)
         .setCharacteristic(
-          this.platform.Characteristic.SerialNumber,
+          MotivPlatform.Characteristic.SerialNumber,
           `${this.accessoryType}-${userId}`
         );
 
       let service = accessory.getService(this.serviceType);
       if (service) {
-        service.setCharacteristic(this.platform.Characteristic.Name, accessory.displayName);
+        service.setCharacteristic(MotivPlatform.Characteristic.Name, accessory.displayName);
       } else {
         service = accessory.addService(this.serviceType, accessory.displayName);
       }
 
       const self = this;
       service
-        .getCharacteristic(this.platform.Characteristic.OccupancyDetected)
+        .getCharacteristic(MotivPlatform.Characteristic.OccupancyDetected)
         .on('get', (callback) => {
           callback(null, self.isAwake);
         });
@@ -96,7 +94,3 @@ class SleepSensor {
     return accessory;
   }
 }
-
-module.exports = {
-  SleepSensor,
-};

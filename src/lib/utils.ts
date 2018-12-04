@@ -1,4 +1,4 @@
-function toTitleCase(value) {
+export function toTitleCase(value: string): string {
   if (!value || value.length < 2) return value;
   return value
     .split(' ')
@@ -6,7 +6,7 @@ function toTitleCase(value) {
     .join(' ');
 }
 
-function timeSpanString(date1, date2) {
+export function timeSpanString(date1: Date, date2: Date): string {
   return Array(3)
     .fill([3600, Math.abs(date1.getTime() - date2.getTime())])
     .map((v, i, a) => {
@@ -22,7 +22,7 @@ function timeSpanString(date1, date2) {
     .join(':');
 }
 
-function getUTCDate(date) {
+export function getUTCDate(date: Date): Date {
   return new Date(
     Date.UTC(
       date.getUTCFullYear(),
@@ -36,7 +36,7 @@ function getUTCDate(date) {
   );
 }
 
-function splitDateAndTime(date) {
+export function splitDateAndTime(date: Date) {
   const parts = (date || new Date()).toISOString().split('T');
   return {
     date: parts.shift(),
@@ -44,19 +44,10 @@ function splitDateAndTime(date) {
   };
 }
 
-function getUTCNowDate() {
+export function getUTCNowDate(): Date {
   return getUTCDate(new Date());
 }
 
-function isEmptyOrUndef(value) {
+export function isEmptyOrUndef(value: string | Date): boolean {
   return value === undefined || value === null || value === '';
 }
-
-module.exports = {
-  toTitleCase,
-  timeSpanString,
-  isEmptyOrUndef,
-  getUTCNowDate,
-  getUTCDate,
-  splitDateAndTime,
-};

@@ -1,12 +1,30 @@
-const { MotivApi } = require('./motiv');
-const { Logger } = require('./logger');
-const { SleepSensor } = require('./sensors/sleepSensor');
-const { getUTCNowDate } = require('./utils');
-const { name: PackageName, displayName: PluginName } = require('../package.json');
+import { MotivApi } from './motiv';
+import { Logger } from './logger';
+import { SleepSensor } from './sensors/sleepSensor';
+import { getUTCNowDate } from './utils';
+import { name as PackageName, displayName as PluginName } from '../../package.json';
 
-let PlatformAccessory, Characteristic, Service, UUIDGen;
+interface PluginConfig {
+  account: {
+    userId: string;
+    sessionToken: string;
+    sessionExpiry: string;
+  };
+  syncSeconds?: number;
+}
 
-class MotivPlatform {
+export class MotivPlatform {
+  private api;
+  private accessories: Map<string, any> = new Map<string, any>();
+  private motivSyncInterval: number;
+  public readonly log: Logger;
+  public readonly motivApi: MotivApi;
+  public readonly config: PluginConfig;
+  public static PlatformAccessory;
+  public static Characteristic;
+  public static Service;
+  public static UUIDGen;
+
   constructor(log, config, api) {
     this.api = api;
     this.config = config || {};
@@ -15,14 +33,6 @@ class MotivPlatform {
 
     this.motivSyncInterval = (this.config.syncSeconds || 120) * 1000;
     this.motivApi = new MotivApi(this.config.account);
-    this.motivData = {
-      isAwake: false,
-    };
-
-    this.PlatformAccessory = PlatformAccessory;
-    this.Characteristic = Characteristic;
-    this.Service = Service;
-    this.UUIDGen = UUIDGen;
 
     const self = this;
     this.api.on('didFinishLaunching', () => {
@@ -44,18 +54,18 @@ class MotivPlatform {
     });
   }
 
-  static preInitPlatform(homebridge) {
+  static preInitPlatform(homebridge): void {
     try {
-      PlatformAccessory = homebridge.platformAccessory;
-      Characteristic = homebridge.hap.Characteristic;
-      Service = homebridge.hap.Service;
-      UUIDGen = homebridge.hap.uuid;
+      MotivPlatform.PlatformAccessory = homebridge.platformAccessory;
+      MotivPlatform.Characteristic = homebridge.hap.Characteristic;
+      MotivPlatform.Service = homebridge.hap.Service;
+      MotivPlatform.UUIDGen = homebridge.hap.uuid;
     } catch (err) {
       Logger.critical(err);
     }
   }
 
-  updateSensors() {
+  updateSensors(): void {
     try {
       this.accessories.forEach((a) => {
         if (a && a.update && typeof a.update === 'function') {
@@ -73,7 +83,7 @@ class MotivPlatform {
     }
   }
 
-  setup() {
+  setup(): void {
     try {
       if (this.motivApi.needsAuth === false) {
         setInterval(
@@ -99,12 +109,12 @@ class MotivPlatform {
   }
 
   // Called from device classes
-  registerPlatformAccessory(accessory) {
+  registerPlatformAccessory(accessory): void {
     this.api.registerPlatformAccessories(PackageName, PluginName, [accessory]);
   }
 
   // Function invoked when homebridge tries to restore cached accessory
-  configureAccessory(accessory) {
+  configureAccessory(accessory): void {
     try {
       if (!this.accessories.has(accessory.UUID)) {
         const type = accessory.context.type || SleepSensor.accessoryType();
@@ -127,11 +137,14 @@ class MotivPlatform {
     }
   }
 
-  addAccessory(accessoryName) {
+  addAccessory(accessoryName: string): void {
     try {
-      const uuid = UUIDGen.generate(`Motiv_${this.config.account.userId}_${accessoryName}`);
+      const uuid = MotivPlatform.UUIDGen.generate(
+        `Motiv_${this.config.account.userId}_${accessoryName}`
+      );
       if (!this.accessories.has(uuid)) {
         let accessoryImpl;
+        const type = accessoryName.toLowerCase();
         switch (type) {
           case 'awake':
             accessoryImpl = new SleepSensor(this, uuid);
@@ -139,15 +152,15 @@ class MotivPlatform {
           default:
             throw new Error(`No Motiv accessory for type "${type}"`);
         }
-        this.registerPlatformAccessory(accessory);
-        this.accessories.set(accessory.UUID, accessoryImpl);
+        this.registerPlatformAccessory(accessoryImpl.accessory);
+        this.accessories.set(accessoryImpl.accessory.UUID, accessoryImpl);
       }
     } catch (err) {
       this.log.error(err);
     }
   }
 
-  removeAccessory(accessory) {
+  removeAccessory(accessory): void {
     try {
       if (!accessory) {
         return;
@@ -159,13 +172,3 @@ class MotivPlatform {
     }
   }
 }
-
-module.exports = {
-  MotivPlatform,
-  PlatformAccessory,
-  Characteristic,
-  Service,
-  UUIDGen,
-  PackageName,
-  PluginName,
-};
